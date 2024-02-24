@@ -1,0 +1,12 @@
+apiVersion: mail.my.domain/v1
+kind: EmailSenderConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: emailsenderconfig
+    app.kubernetes.io/instance: emailsenderconfig-sample
+    app.kubernetes.io/part-of: mail-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: mail-operator
+  name: emailsenderconfig-sample
+spec:
+  # TODO(user): Add fields here
