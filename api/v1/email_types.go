@@ -40,7 +40,7 @@ type EmailStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="status",type=string,JSONPath=`.status.deliveryStatus`
 // +kubebuilder:printcolumn:name="recipient",type=string,JSONPath=`.spec.recipientEmail`
-// +kubebuilder:printcolumn:name="sender",type=string,JSONPath=`.spec.senderConfigRef.senderEmail`
+// +kubebuilder:printcolumn:name="id",type=string,JSONPath=`.status.messageId`
 
 // Email is the Schema for the emails API
 type Email struct {

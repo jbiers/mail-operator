@@ -21,8 +21,8 @@ spec:
     - jsonPath: .spec.recipientEmail
       name: recipient
       type: string
-    - jsonPath: .spec.senderConfigRef.senderEmail
-      name: sender
+    - jsonPath: .status.messageId
+      name: id
       type: string
     name: v1
     schema:

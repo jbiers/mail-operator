@@ -18,9 +18,12 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	mailv1 "github.com/jbiers/mail-operator/api/v1"
 	"github.com/jbiers/mail-operator/provider"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,31 +40,55 @@ type EmailReconciler struct {
 //+kubebuilder:rbac:groups=mail.my.domain,resources=emails/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=mail.my.domain,resources=emails/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Email object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.0/pkg/reconcile
 func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	var email mailv1.Email
 
-	err := r.Get(ctx, req.NamespacedName, &email)
-	if err != nil {
+	if err := r.Get(ctx, req.NamespacedName, &email); err != nil {
 		logger.Error(err, "error getting Email resource.", "name", req.NamespacedName)
-		return ctrl.Result{}, client.IgnoreNotFound(nil)
+		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	var emailSenderConfig mailv1.EmailSenderConfig
+	emailSenderConfigData := req.NamespacedName
+	emailSenderConfigData.Name = email.Spec.SenderConfigRef
+
+	if err := r.Get(ctx, emailSenderConfigData, &emailSenderConfig); err != nil {
+		logger.Error(err, "error getting EmailSenderConfig resource.", "name", emailSenderConfigData)
+		return ctrl.Result{}, err
+	}
+
+	apiTokenArray := strings.Split(emailSenderConfig.Spec.ApiToken, ".")
+	if len(apiTokenArray) != 2 {
+		err := fmt.Errorf("emailSenderConfig.Spec.ApiToken must have the following format: <secret-name>.<provider-name>")
+
+		logger.Error(err, "error getting Secrets data from emailSenderConfig.", "name", emailSenderConfigData)
+		return ctrl.Result{}, err
+	}
+
+	secretName := apiTokenArray[0]
+	emailProvider := apiTokenArray[1]
+
+	var apiTokenSecret corev1.Secret
+	apiTokenData := req.NamespacedName
+	apiTokenData.Name = secretName
+
+	if err := r.Get(ctx, apiTokenData, &apiTokenSecret); err != nil {
+		logger.Error(err, "error getting Secret resource.", "name", apiTokenData)
+		return ctrl.Result{}, err
+	}
+
+	apiToken := string(apiTokenSecret.Data[emailProvider])
+
+	// if Email resource was just created
 	if email.Status.DeliveryStatus == "" {
+		logger.Info("sending email defined in Email resource.", "name", req.NamespacedName)
+
 		err, messageId, deliveryStatus := provider.SendEmail(&provider.EmailData{
-			ApiKey:    email.Spec.SenderConfigRef, // This will actually be data gotten from the senderConfig
+			ApiToken:  apiToken,
 			Text:      email.Spec.Body,
 			Subject:   email.Spec.Subject,
-			Sender:    "anon@juliacodes.net", // This will actually be data gotten from the senderConfig
+			Sender:    emailSenderConfig.Spec.SenderEmail,
 			Recipient: email.Spec.RecipientEmail,
 		})
 
@@ -70,15 +97,16 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			DeliveryStatus: deliveryStatus,
 		}
 
-		if err != nil || email.Status.DeliveryStatus != "202 Accepted" {
-			logger.Error(err, "error sending email.", "name", req.NamespacedName)
-			return ctrl.Result{}, client.IgnoreNotFound(nil)
+		if updateErr := r.Status().Update(ctx, &email); err != nil {
+			logger.Error(updateErr, "error updating Email resource status.", "name", req.NamespacedName)
+			return ctrl.Result{}, updateErr
 		}
 
-		err = r.Status().Update(ctx, &email)
-		if err != nil {
-			logger.Error(err, "error updating Email resource status.", "name", req.NamespacedName)
-			return ctrl.Result{}, client.IgnoreNotFound(nil)
+		if err != nil || deliveryStatus != "202 Accepted" {
+			m := fmt.Sprintf(`there was an issue in delivering the email %s. code: %s`, messageId, deliveryStatus)
+			logger.Error(err, m, "name", req.NamespacedName)
+
+			return ctrl.Result{}, nil
 		}
 	}
 
