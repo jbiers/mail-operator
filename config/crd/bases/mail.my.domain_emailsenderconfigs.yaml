@@ -47,6 +47,9 @@ spec:
                 type: string
               senderEmail:
                 type: string
+            required:
+            - apiToken
+            - senderEmail
             type: object
           status:
             description: EmailSenderConfigStatus defines the observed state of EmailSenderConfig

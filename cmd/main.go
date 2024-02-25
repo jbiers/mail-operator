@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	mailv1 "github.com/jbiers/mail-operator/api/v1"
+	"github.com/jbiers/mail-operator/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -121,6 +122,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controller.EmailReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Email")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

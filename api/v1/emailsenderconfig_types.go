@@ -22,8 +22,9 @@ import (
 
 // EmailSenderConfigSpec defines the desired state of EmailSenderConfig
 type EmailSenderConfigSpec struct {
-	ApiToken    string `json:"apiToken,omitempty"`
-	SenderEmail string `json:"senderEmail,omitempty"`
+	// +kubebuilder:validation:Required
+	ApiToken    string `json:"apiToken"`
+	SenderEmail string `json:"senderEmail"`
 }
 
 // EmailSenderConfigStatus defines the observed state of EmailSenderConfig

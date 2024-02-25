@@ -57,6 +57,10 @@ spec:
                 type: string
               subject:
                 type: string
+            required:
+            - body
+            - recipientEmail
+            - senderConfigRef
             type: object
           status:
             description: EmailStatus defines the observed state of Email

@@ -22,10 +22,12 @@ import (
 
 // EmailSpec defines the desired state of Email
 type EmailSpec struct {
-	SenderConfigRef string `json:"senderConfigRef,omitempty"`
-	RecipientEmail  string `json:"recipientEmail,omitempty"`
-	Subject         string `json:"subject,omitempty"`
-	Body            string `json:"body,omitempty"`
+	Subject string `json:"subject,omitempty"`
+
+	// +kubebuilder:validation:Required
+	SenderConfigRef string `json:"senderConfigRef"`
+	RecipientEmail  string `json:"recipientEmail"`
+	Body            string `json:"body"`
 }
 
 // EmailStatus defines the observed state of Email
