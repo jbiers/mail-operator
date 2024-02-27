@@ -3,6 +3,8 @@ module github.com/jbiers/mail-operator
 go 1.21
 
 require (
+	github.com/mailersend/mailersend-go v1.5.1
+	github.com/mailgun/mailgun-go/v4 v4.12.0
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	k8s.io/apimachinery v0.29.2
@@ -36,8 +38,6 @@ require (
 	github.com/imdario/mergo v0.3.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/mailersend/mailersend-go v1.5.1 // indirect
-	github.com/mailgun/mailgun-go/v4 v4.12.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
