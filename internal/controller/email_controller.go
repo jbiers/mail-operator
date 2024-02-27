@@ -19,11 +19,10 @@ package controller
 import (
 	"context"
 	"fmt"
-	"strings"
+	"os"
 
 	mailv1 "github.com/jbiers/mail-operator/api/v1"
 	"github.com/jbiers/mail-operator/provider"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,33 +57,35 @@ func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, err
 	}
 
-	apiTokenArray := strings.Split(emailSenderConfig.Spec.ApiToken, ".")
-	if len(apiTokenArray) != 2 {
-		err := fmt.Errorf("emailSenderConfig.Spec.ApiToken must have the following format: <secret-name>.<provider-name>")
+	apiToken := os.Getenv(emailSenderConfig.Spec.ApiToken)
+	if apiToken == "" {
+		err := fmt.Errorf("empty value for environment variable %s", emailSenderConfig.Spec.ApiToken)
 
-		logger.Error(err, "error getting Secrets data from emailSenderConfig.", "name", emailSenderConfigData)
+		logger.Error(err, "error getting the API token from emailSenderConfig", "name", emailSenderConfigData)
 		return ctrl.Result{}, err
 	}
-
-	secretName := apiTokenArray[0]
-	emailProvider := apiTokenArray[1]
-
-	var apiTokenSecret corev1.Secret
-	apiTokenData := req.NamespacedName
-	apiTokenData.Name = secretName
-
-	if err := r.Get(ctx, apiTokenData, &apiTokenSecret); err != nil {
-		logger.Error(err, "error getting Secret resource.", "name", apiTokenData)
-		return ctrl.Result{}, err
-	}
-
-	apiToken := string(apiTokenSecret.Data[emailProvider])
 
 	// if Email resource was just created
 	if email.Status.DeliveryStatus == "" {
+		var p provider.EmailProvider
+
+		switch emailSenderConfig.Spec.ApiToken {
+		case "mailersend":
+			p = &provider.MailerSend{}
+		case "mailgun":
+			p = &provider.MailGun{}
+		default:
+			err := fmt.Errorf("invalid value for API token")
+
+			logger.Error(err, "supported: mailersend, mailgun", "name", emailSenderConfigData)
+			return ctrl.Result{}, err
+		}
+
+		emailSender := initEmailSender(p)
+
 		logger.Info("sending email defined in Email resource.", "name", req.NamespacedName)
 
-		err, messageId, deliveryStatus := provider.SendEmail(&provider.EmailData{
+		err, messageId, deliveryStatus := emailSender.sendEmail(&provider.EmailData{
 			ApiToken:  apiToken,
 			Text:      email.Spec.Body,
 			Subject:   email.Spec.Subject,

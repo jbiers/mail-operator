@@ -7,10 +7,10 @@ metadata:
     app.kubernetes.io/part-of: mail-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: mail-operator
-  name: email-sample1234
+  name: email-sample123456
   # namespace: mail-operator-system
 spec:
-  recipientEmail: test22@juliacodes.net
+  recipientEmail: test222@juliacodes.net
   senderConfigRef: mailerliteconfig
   body: hii
   subject: kkkk

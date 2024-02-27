@@ -1,5 +1,11 @@
 # mail-operator
-// TODO(user): Add simple overview of use/purpose
+
+- define env variable for namespace
+- have running cluster
+- set api key in secret kustomize file
+- deploy base kustomize structure
+- deploy emailConfigMap
+- deploy Email
 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use

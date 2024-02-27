@@ -9,5 +9,5 @@ metadata:
     app.kubernetes.io/created-by: mail-operator
   name: mailerliteconfig
 spec:
-  apiToken: token-secret.mailersend
+  apiToken: mailersend
   senderEmail: sender@juliacodes.net
