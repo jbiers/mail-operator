@@ -56,6 +56,6 @@ I chose to develop the controller in a way that is easy to add new providers. Yo
 This project was built in only 5 days. With more time in my hands, the following points should be addressed:
 
 - Unit and Integration testing.
-- Better test the MailGun integration.
+- Better test the MailGun integration. I did not have the chance to test it as extensively as Mailersend.
 - Automate the deployment with a CI/CD tool like Github Actions.
 - Generate Helm Charts. Kustomize does a good job here but Helm is my option of choice in most production cases.
