@@ -11,7 +11,7 @@ To run the operator you need to make sure you have a cluster configured on your 
 
 Having that, run the following command to install the Email and EmailSenderConfig CRDs into your Kubernetes cluster:
 ```sh
-make install
+make manifests; make generate; make install
 ```
 
 Update the config/secrets/token_secret.yaml file to include your Mailersend and/or Mailergun API keys hashed as B64. Please keep their name the same as it will be referenced inside the application. You can use the following command to generate the hash:
@@ -25,12 +25,12 @@ docker build . -t <YOUR-REPOSITORY>/controller:latest
 docker push <YOUR-REPOSITORY>/controller:latest
 ```
 
-Now, the operator should be runner on your cluster. For testing it, first create an EmailSenderConfig resource as per the example in config/samples/mail_v1_emailsenderconfig.yaml. Note that the value for *apiToken* should be either *mailersend* or *mailgun*, depending on the providers you have configured and which one you want to use. If you wish to use both for different emails, create two separate EmailSenderConfig resources. Create the resource with the command:
+Now, the operator should be running on your cluster. For testing it, first create an EmailSenderConfig resource as per the example in config/samples/mail_v1_emailsenderconfig.yaml. Note that the value for *apiToken* should be either *mailersend* or *mailgun*, depending on the providers you have configured and which one you want to use. If you wish to use both for different emails, create two separate EmailSenderConfig resources. Create the resource with the command:
 ```sh
 kubectl apply -f config/samples/mail_v1_emailsenderconfig.yaml
 ```
 
-The remaining step is to create the Email resource itself. Follow the sample at config/samples/mail_v1_email.yaml and create it.
+The remaining step is to create the Email resource itself. Edit the file at config/samples/mail_v1_email.yaml according to your scenario and create it.
 ```sh
 kubectl apply -f config/samples/mail_v1_email.yaml
 ```
