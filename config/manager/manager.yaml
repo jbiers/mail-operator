@@ -43,7 +43,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: controller:latest
+        image: jbiers/controller:latest
         name: manager
         envFrom:
         - secretRef:

@@ -22,7 +22,7 @@ import (
 	"os"
 
 	mailv1 "github.com/jbiers/mail-operator/api/v1"
-	"github.com/jbiers/mail-operator/provider"
+	"github.com/jbiers/mail-operator/internal/provider"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,6 +38,9 @@ type EmailReconciler struct {
 //+kubebuilder:rbac:groups=mail.my.domain,resources=emails,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=mail.my.domain,resources=emails/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=mail.my.domain,resources=emails/finalizers,verbs=update
+//+kubebuilder:rbac:groups=mail.my.domain,resources=emailsenderconfigs,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=mail.my.domain,resources=emailsenderconfigs/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=mail.my.domain,resources=emailsenderconfigs/finalizers,verbs=update
 
 func (r *EmailReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)

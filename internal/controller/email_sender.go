@@ -1,6 +1,6 @@
 package controller
 
-import "github.com/jbiers/mail-operator/provider"
+import "github.com/jbiers/mail-operator/internal/provider"
 
 type EmailSender struct {
 	provider provider.EmailProvider

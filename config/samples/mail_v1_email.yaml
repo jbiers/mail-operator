@@ -10,7 +10,7 @@ metadata:
   name: email-sample123456
   # namespace: mail-operator-system
 spec:
-  recipientEmail: test222@juliacodes.net
+  recipientEmail: juliabier@juliacodes.net
   senderConfigRef: mailerliteconfig
   body: hii
   subject: kkkk
